@@ -38,7 +38,7 @@ mob = constants.MOBILE
 updatePDF = False
 
 # If Headless = True, script runs Chrome in headless mode without visible GUI
-headless = True
+headless = False
 
 # ----- No other changes required -----
 
@@ -156,8 +156,7 @@ def randomText():
 
 
 def LoadNaukri(headless):
-    """Open Chrome to load Naukri.com with stealth/undetected driver"""
-
+    """Open Chrome to load Naukri.com with undetected-chromedriver"""
     options = uc.ChromeOptions()
     options.add_argument("--disable-notifications")
     options.add_argument("--start-maximized")
@@ -168,7 +167,7 @@ def LoadNaukri(headless):
     options.add_argument("--disable-blink-features=AutomationControlled")
     
     if headless:
-        options.add_argument("--headless=new")  # headless for CI
+        options.add_argument("--headless=new")  # works in Chrome 109+
 
     # Pretend to be a normal user
     options.add_argument(
@@ -179,13 +178,13 @@ def LoadNaukri(headless):
 
     driver = None
     try:
-        driver = uc.Chrome(use_subprocess=True, options=options)
+        driver = uc.Chrome(options=options, use_subprocess=True)
+        log_msg("Google Chrome Launched!")
+        driver.implicitly_wait(5)
+        driver.get(constants.NAUKRI_LOGIN_URL)
     except Exception as e:
-        print(f"Error launching Chrome: {e}")
-
-    log_msg("Google Chrome Launched!")
-    driver.implicitly_wait(5)
-    driver.get(constants.NaukriURL)
+        log_msg(f"Error launching Chrome: {e}")
+        return None  # fail gracefully
     return driver
 
 
@@ -201,7 +200,9 @@ def naukriLogin(headless=False):
 
     try:
         driver = LoadNaukri(headless)
-
+        if driver is None:
+          log_msg("Chrome failed to start, aborting login.")
+          return False, None
         log_msg(driver.title)
         if "naukri.com" in driver.title.lower():
             log_msg("Website Loaded Successfully.")

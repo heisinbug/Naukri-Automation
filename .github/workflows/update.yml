@@ -29,6 +29,16 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Install Latest Google Chrome
+        run: |
+         sudo apt-get remove -y google-chrome-stable
+         sudo apt-get purge -y google-chrome-stable
+         sudo apt-get update
+         sudo apt install -y wget unzip
+         wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+         sudo apt install -y ./google-chrome-stable_current_amd64.deb
+         google-chrome --version
+         chromedriver --version
     #  - name: Add random delay (0–90 min)
     #    run: python -c "import random, time; d=random.randint(0,5400); print(f'Sleeping {d//60} min'); time.sleep(d)"
 
