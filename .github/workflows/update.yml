@@ -29,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Add random delay (0–90 min)
-        run: python -c "import random, time; d=random.randint(0,5400); print(f'Sleeping {d//60} min'); time.sleep(d)"
+    #  - name: Add random delay (0–90 min)
+    #    run: python -c "import random, time; d=random.randint(0,5400); print(f'Sleeping {d//60} min'); time.sleep(d)"
 
       - name: Run Naukri Update Script
         run: python naukri.py
