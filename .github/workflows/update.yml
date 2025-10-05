@@ -1,0 +1,36 @@
+name: Naukri Daily Update
+
+on:
+  # 🕒 Automatic daily run at 6:30 AM IST (base UTC time)
+  schedule:
+    - cron: "0 1 * * *"
+
+  # 🧑‍💻 Manual trigger button in GitHub → Actions → Run workflow
+  workflow_dispatch:
+
+jobs:
+  run-naukri:
+    runs-on: ubuntu-latest
+
+    env:
+      NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
+      NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
+      NAUKRI_MOBILE: ${{ secrets.NAUKRI_MOBILE }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Add random delay (0–90 min)
+        run: python -c "import random, time; d=random.randint(0,5400); print(f'Sleeping {d//60} min'); time.sleep(d)"
+
+      - name: Run Naukri Update Script
+        run: python naukri.py
