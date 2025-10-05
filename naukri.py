@@ -179,7 +179,7 @@ def LoadNaukri(headless):
 
     driver = None
     try:
-        driver = uc.Chrome(options=options)
+        driver = uc.Chrome(use_subprocess=True, options=options)
     except Exception as e:
         print(f"Error launching Chrome: {e}")
 
