@@ -1,46 +1,40 @@
-name: Naukri Daily Update
+name: Naukri Auto Update (Windows)
 
 on:
-  # 🕒 Automatic daily run at 6:30 AM IST (base UTC time)
-  schedule:
-    - cron: "0 1 * * *"
-
-  # 🧑‍💻 Manual trigger button in GitHub → Actions → Run workflow
   workflow_dispatch:
 
 jobs:
   run-naukri:
-    runs-on: ubuntu-latest
-
-    env:
-      NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
-      NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
-      NAUKRI_MOBILE: ${{ secrets.NAUKRI_MOBILE }}
+    runs-on: windows-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.11'
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
 
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Install Latest Google Chrome
+      - name: Install Google Chrome
         run: |
-         sudo apt-get remove -y google-chrome-stable
-         sudo apt-get purge -y google-chrome-stable
-         sudo apt-get update
-         sudo apt install -y wget unzip
-         wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-         sudo apt install -y ./google-chrome-stable_current_amd64.deb
-         google-chrome --version
-         chromedriver --version
-    #  - name: Add random delay (0–90 min)
-    #    run: python -c "import random, time; d=random.randint(0,5400); print(f'Sleeping {d//60} min'); time.sleep(d)"
+          choco install googlechrome --no-progress --yes
+          echo "Refreshing environment..."
+          refreshenv
+          # Verify Chrome installation
+          & "C:\Program Files\Google\Chrome\Application\chrome.exe" --version
 
-      - name: Run Naukri Update Script
-        run: python naukri.py
+      - name: Run Naukri automation
+        env:
+          USERNAME: ${{ secrets.NAUKRI_USERNAME }}
+          PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
+          MOBILE: ${{ secrets.NAUKRI_MOBILE }}
+        run: |
+          echo "Running Naukri script..."
+          python naukri.py

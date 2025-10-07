@@ -15,7 +15,6 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from selenium import webdriver
-import undetected_chromedriver as uc
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
@@ -38,7 +37,7 @@ mob = constants.MOBILE
 updatePDF = False
 
 # If Headless = True, script runs Chrome in headless mode without visible GUI
-headless = False
+headless = True
 
 # ----- No other changes required -----
 
@@ -156,35 +155,28 @@ def randomText():
 
 
 def LoadNaukri(headless):
-    """Open Chrome to load Naukri.com with undetected-chromedriver"""
-    options = uc.ChromeOptions()
+    """Open Chrome to load Naukri.com"""
+
+    options = webdriver.ChromeOptions()
     options.add_argument("--disable-notifications")
-    options.add_argument("--start-maximized")
+    options.add_argument("--start-maximized")  # ("--kiosk") for MAC
     options.add_argument("--disable-popups")
     options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    
     if headless:
-        options.add_argument("--headless=new")  # works in Chrome 109+
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("headless")
 
-    # Pretend to be a normal user
-    options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/125.0.0.0 Safari/537.36"
-    )
-
+    # updated to use latest selenium Chrome service
     driver = None
     try:
-        driver = uc.Chrome(options=options, use_subprocess=True)
-        log_msg("Google Chrome Launched!")
-        driver.implicitly_wait(5)
-        driver.get(constants.NAUKRI_LOGIN_URL)
+        driver = webdriver.Chrome(options=options, service=ChromeService())
     except Exception as e:
-        log_msg(f"Error launching Chrome: {e}")
-        return None  # fail gracefully
+        print(f"Error launching Chrome: {e}")
+        driver = webdriver.Chrome(options)
+    log_msg("Google Chrome Launched!")
+
+    driver.implicitly_wait(5)
+    driver.get(NaukriURL)
     return driver
 
 
@@ -200,9 +192,7 @@ def naukriLogin(headless=False):
 
     try:
         driver = LoadNaukri(headless)
-        if driver is None:
-          log_msg("Chrome failed to start, aborting login.")
-          return False, None
+
         log_msg(driver.title)
         if "naukri.com" in driver.title.lower():
             log_msg("Website Loaded Successfully.")
